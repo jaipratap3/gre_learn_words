@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRE Flashcards</title>
+    <link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+    <div class="app-container">
+        <!-- THEME TOGGLE -->
+        <button id="theme-toggle" class="btn btn-outline" style="position: absolute; top: 1.5rem; left: 1.5rem; z-index: 1000; display: flex; align-items: center; gap: 0.5rem; border-radius: 20px;">
+            <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+        </button>
+
+        <!-- HOME VIEW -->
+        <div id="home-view" class="view">
+            <header>
+                <h1>GRE Flashcards</h1>
+                <p>Select a part to start studying</p>
+            </header>
+            <div class="parts-grid" id="parts-grid">
+                <!-- Part cards injected by JS -->
+            </div>
+        </div>
+
+        <!-- FLASHCARD VIEW -->
+        <div id="flashcard-view" class="view hidden container">
+            <header style="position: relative; width: 100%;">
+                <button id="back-btn" class="btn btn-outline" style="position: absolute; left: 0; top: 0;">&larr; Back</button>
+                <h1 id="part-title">Flashcards</h1>
+                <p>1000 Most Important Words</p>
+            </header>
+            
+            <div class="flashcard-container" id="flashcard-container">
+                <div class="loading">Loading flashcards...</div>
+            </div>
+
+            <div class="controls">
+                <button id="prev-btn" class="btn">Previous</button>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <span id="counter">0 / 0</span>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="jump-input" min="1" placeholder="#" style="width: 70px; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(0,0,0,0.1); color: var(--text-primary); text-align: center; font-family: inherit;">
+                        <button id="jump-btn" class="btn" style="padding: 0.5rem 1rem;">Go</button>
+                    </div>
+                </div>
+                <button id="next-btn" class="btn">Next</button>
+            </div>
+        </div>
+
+        <!-- QUIZ VIEW -->
+        <div id="quiz-view" class="view hidden container">
+            <header style="position: relative; width: 100%;">
+                <button id="quiz-back-btn" class="btn btn-outline" style="position: absolute; left: 0; top: 0;">&larr; Back</button>
+                <h1 id="quiz-title">Quiz Mode</h1>
+                <p id="quiz-progress">Question 1 / 15</p>
+            </header>
+            
+            <div class="quiz-container">
+                <div id="quiz-sentence" class="quiz-sentence">Loading...</div>
+                <div id="quiz-options" class="quiz-options">
+                    <!-- Options injected here -->
+                </div>
+            </div>
+        </div>
+        <!-- MATCH VIEW -->
+        <div id="match-view" class="view hidden container" style="max-width: 1000px;">
+            <header style="position: relative; width: 100%;">
+                <button id="match-back-btn" class="btn btn-outline" style="position: absolute; left: 0; top: 0;">&larr; Back</button>
+                <h1 id="match-title">Match the Columns</h1>
+                <p id="match-progress">Batch 1</p>
+            </header>
+            
+            <div class="match-container" style="display: flex; gap: 2rem; width: 100%;">
+                <div id="match-words" class="match-column" style="flex: 1; display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Word buttons injected here -->
+                </div>
+                <div id="match-sentences" class="match-column" style="flex: 2; display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Sentence buttons injected here -->
+                </div>
+            </div>
+            
+            <button id="match-next-btn" class="btn hidden" style="margin-top: 2rem; width: 100%; max-width: 300px;">Next 5 Words</button>
+        </div>
+    </div>
+    
+    <!-- MODE MODAL -->
+    <div id="mode-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Select Mode</h2>
+            <p>How would you like to study <span id="modal-part-name"></span>?</p>
+            
+            <div class="modal-options">
+                <button id="mode-flashcards-btn" class="btn">Study Flashcards</button>
+                
+                <div class="quiz-setup">
+                    <label>Test me on word numbers:</label>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; align-items: center;">
+                        <input type="number" id="quiz-start" min="1" max="150" value="1" style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-primary); font-family: inherit;">
+                        <span style="color: var(--text-secondary);">to</span>
+                        <input type="number" id="quiz-end" min="1" max="150" value="150" style="flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-primary); font-family: inherit;">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button id="mode-quiz-btn" class="btn btn-outline" style="background: rgba(0,0,0,0.2); flex: 1;">Start Quiz</button>
+                        <button id="mode-match-btn" class="btn btn-outline" style="background: rgba(0,0,0,0.2); flex: 1;">Start Match Mode</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="close-modal-btn" class="btn btn-outline" style="margin-top: 1.5rem; width: 100%;">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Translation Sidebar/Popup -->
+    <div id="translation-sidebar" class="sidebar hidden">
+        <div id="sidebar-resizer" class="resizer"></div>
+        <div class="sidebar-header">
+            <h3>Meaning & Translation <span id="sidebar-word" style="color: var(--text-primary); font-weight: 600; margin-left: 0.5rem; font-size: 1.2rem;"></span></h3>
+            <button id="close-sidebar" class="close-btn">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <h4>1. English Meaning (Original):</h4>
+                <p id="english-text"></p>
+            </div>
+            
+            <div class="sidebar-section">
+                <h4>2. Easy English Explanation:</h4>
+                <p id="synonyms-text">Loading...</p>
+            </div>
+
+            <div class="sidebar-section">
+                <h4>3. Hindi Translation:</h4>
+                <p id="translation-text">Loading translation...</p>
+            </div>
+        </div>
+    </div>
+    <div id="sidebar-overlay" class="overlay hidden"></div>
+
+    <script src="script.js?v=8"></script>
+</body>
+</html>
