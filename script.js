@@ -16,11 +16,12 @@ const counter = document.getElementById('counter');
 
 async function loadWords() {
     try {
-        const response = await fetch('words.json');
+        const version = new Date().getTime();
+        const response = await fetch(`words.json?v=${version}`);
         allWords = await response.json();
         
         try {
-            const mResponse = await fetch('mnemonics.json');
+            const mResponse = await fetch(`mnemonics.json?v=${version}`);
             mnemonicsMap = await mResponse.json();
         } catch (e) {
             console.warn('Could not load mnemonics.json (it might be missing or empty).');
