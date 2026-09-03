@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRE Flashcards</title>
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
     <div class="app-container">
@@ -15,9 +15,17 @@
 
         <!-- HOME VIEW -->
         <div id="home-view" class="view">
-            <header>
+            <header style="width: 100%;">
                 <h1>GRE Flashcards</h1>
                 <p>Select a part to start studying</p>
+                <div class="search-wrapper">
+                    <div class="search-input-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="word-search" placeholder="Search any word, meaning, or mnemonic..." autocomplete="off">
+                        <button id="search-clear-btn" class="search-clear hidden" title="Clear">&times;</button>
+                    </div>
+                    <div id="search-dropdown" class="search-dropdown hidden"></div>
+                </div>
             </header>
             <div class="parts-grid" id="parts-grid">
                 <!-- Part cards injected by JS -->
@@ -138,6 +146,6 @@
     </div>
     <div id="sidebar-overlay" class="overlay hidden"></div>
 
-    <script src="script.js?v=9"></script>
+    <script src="script.js?v=10"></script>
 </body>
 </html>

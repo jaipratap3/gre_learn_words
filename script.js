@@ -14,6 +14,11 @@ const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
 const counter = document.getElementById('counter');
 
+// Search Elements
+const wordSearchInput = document.getElementById('word-search');
+const searchClearBtn = document.getElementById('search-clear-btn');
+const searchDropdown = document.getElementById('search-dropdown');
+
 async function loadWords() {
     try {
         const version = new Date().getTime();
@@ -99,9 +104,14 @@ modeFlashcardsBtn.addEventListener('click', () => {
     startFlashcards(currentSelectedPart);
 });
 
-function startFlashcards(partNum) {
+function startFlashcards(partNum, targetWord = null) {
     words = allWords.filter(w => w.part == partNum);
-    currentIndex = 0;
+    if (targetWord) {
+        const targetIdx = words.findIndex(w => w.word.toUpperCase() === targetWord.toUpperCase());
+        currentIndex = targetIdx !== -1 ? targetIdx : 0;
+    } else {
+        currentIndex = 0;
+    }
     partTitle.textContent = getPartLabel(partNum);
     
     homeView.classList.add('hidden');
@@ -109,6 +119,180 @@ function startFlashcards(partNum) {
     
     renderCard();
 }
+
+// --- SEARCH FUNCTIONALITY ---
+let activeSearchIndex = -1;
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function highlightMatch(text, query) {
+    if (!text || !query) return escapeHtml(text || '');
+    const cleanText = String(text);
+    const lower = cleanText.toLowerCase();
+    const idx = lower.indexOf(query.toLowerCase());
+    if (idx === -1) return escapeHtml(cleanText);
+    
+    const before = escapeHtml(cleanText.substring(0, idx));
+    const match = escapeHtml(cleanText.substring(idx, idx + query.length));
+    const after = escapeHtml(cleanText.substring(idx + query.length));
+    return `${before}<mark style="background: rgba(250, 204, 21, 0.4); color: inherit; padding: 0 2px; border-radius: 2px;">${match}</mark>${after}`;
+}
+
+function handleSearch() {
+    if (!wordSearchInput || !searchDropdown) return;
+    const query = wordSearchInput.value.trim().toLowerCase();
+    
+    if (!query) {
+        searchDropdown.classList.add('hidden');
+        searchDropdown.innerHTML = '';
+        if (searchClearBtn) searchClearBtn.classList.add('hidden');
+        activeSearchIndex = -1;
+        return;
+    }
+    
+    if (searchClearBtn) searchClearBtn.classList.remove('hidden');
+    
+    const scoredMatches = [];
+    allWords.forEach(w => {
+        const wordStr = (w.word || '').toLowerCase();
+        const descStr = (w.description || '').toLowerCase();
+        const mnemStr = (mnemonicsMap[w.word.toUpperCase()] || '').toLowerCase();
+        
+        let score = 0;
+        if (wordStr === query) {
+            score = 100;
+        } else if (wordStr.startsWith(query)) {
+            score = 80;
+        } else if (wordStr.includes(query)) {
+            score = 60;
+        } else if (mnemStr.includes(query)) {
+            score = 40;
+        } else if (descStr.includes(query)) {
+            score = 20;
+        }
+        
+        if (score > 0) {
+            scoredMatches.push({ wordObj: w, score });
+        }
+    });
+    
+    scoredMatches.sort((a, b) => b.score - a.score || a.wordObj.word.localeCompare(b.wordObj.word));
+    const results = scoredMatches.slice(0, 25);
+    
+    if (results.length === 0) {
+        searchDropdown.innerHTML = `<div class="search-no-results">No matching words found for "<strong>${escapeHtml(query)}</strong>"</div>`;
+        searchDropdown.classList.remove('hidden');
+        activeSearchIndex = -1;
+        return;
+    }
+    
+    searchDropdown.innerHTML = '';
+    activeSearchIndex = -1;
+    
+    results.forEach(({ wordObj }, idx) => {
+        const item = document.createElement('div');
+        item.className = 'search-item';
+        item.dataset.index = idx;
+        
+        const hasMnemonic = !!mnemonicsMap[wordObj.word.toUpperCase()];
+        const highlightedWord = highlightMatch(wordObj.word, query);
+        const highlightedDesc = highlightMatch(wordObj.description, query);
+        
+        item.innerHTML = `
+            <div class="search-item-header">
+                <span class="search-item-word">
+                    ${highlightedWord}
+                    ${hasMnemonic ? '<span class="search-item-mnemonic-badge">💡 Mnemonic</span>' : ''}
+                </span>
+                <span class="search-item-badge">${getPartLabel(wordObj.part)} &bull; #${wordObj.num}</span>
+            </div>
+            <div class="search-item-desc">${highlightedDesc}</div>
+        `;
+        
+        item.onclick = () => {
+            selectSearchResult(wordObj);
+        };
+        
+        searchDropdown.appendChild(item);
+    });
+    
+    searchDropdown.classList.remove('hidden');
+}
+
+function selectSearchResult(wordObj) {
+    if (searchDropdown) {
+        searchDropdown.classList.add('hidden');
+        searchDropdown.innerHTML = '';
+    }
+    if (wordSearchInput) wordSearchInput.value = '';
+    if (searchClearBtn) searchClearBtn.classList.add('hidden');
+    activeSearchIndex = -1;
+    startFlashcards(wordObj.part, wordObj.word);
+}
+
+function updateActiveSearchItem(items) {
+    items.forEach((item, idx) => {
+        if (idx === activeSearchIndex) {
+            item.classList.add('active');
+            item.scrollIntoView({ block: 'nearest' });
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+if (wordSearchInput) {
+    wordSearchInput.addEventListener('input', handleSearch);
+    wordSearchInput.addEventListener('focus', () => {
+        if (wordSearchInput.value.trim().length > 0) {
+            handleSearch();
+        }
+    });
+    
+    wordSearchInput.addEventListener('keydown', (e) => {
+        const items = searchDropdown ? searchDropdown.querySelectorAll('.search-item') : [];
+        if (!items || items.length === 0 || searchDropdown.classList.contains('hidden')) return;
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeSearchIndex = (activeSearchIndex + 1) % items.length;
+            updateActiveSearchItem(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeSearchIndex = (activeSearchIndex - 1 + items.length) % items.length;
+            updateActiveSearchItem(items);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeSearchIndex >= 0 && activeSearchIndex < items.length) {
+                items[activeSearchIndex].click();
+            } else if (items.length > 0) {
+                items[0].click();
+            }
+        } else if (e.key === 'Escape') {
+            searchDropdown.classList.add('hidden');
+            activeSearchIndex = -1;
+        }
+    });
+}
+
+if (searchClearBtn) {
+    searchClearBtn.addEventListener('click', () => {
+        if (wordSearchInput) {
+            wordSearchInput.value = '';
+            handleSearch();
+            wordSearchInput.focus();
+        }
+    });
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrapper')) {
+        if (searchDropdown) searchDropdown.classList.add('hidden');
+    }
+});
 
 backBtn.addEventListener('click', () => {
     flashcardView.classList.add('hidden');
