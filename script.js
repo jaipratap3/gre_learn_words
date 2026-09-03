@@ -39,6 +39,10 @@ async function loadWords() {
     }
 }
 
+function getPartLabel(part) {
+    return isNaN(part) ? `${part}` : `Part ${part}`;
+}
+
 function renderHome() {
     const partsMap = {};
     allWords.forEach(w => {
@@ -47,11 +51,18 @@ function renderHome() {
     });
     
     partsGrid.innerHTML = '';
-    Object.keys(partsMap).sort((a,b) => a-b).forEach(part => {
+    Object.keys(partsMap).sort((a,b) => {
+        const numA = parseInt(a, 10);
+        const numB = parseInt(b, 10);
+        if (isNaN(numA) && isNaN(numB)) return a.localeCompare(b);
+        if (isNaN(numA)) return 1;
+        if (isNaN(numB)) return -1;
+        return numA - numB;
+    }).forEach(part => {
         const card = document.createElement('div');
         card.className = 'part-card';
         card.innerHTML = `
-            <h2>Part ${part}</h2>
+            <h2>${getPartLabel(part)}</h2>
             <p>${partsMap[part]} Words</p>
         `;
         card.onclick = () => showModeModal(part);
@@ -70,7 +81,7 @@ const quizEnd = document.getElementById('quiz-end');
 
 function showModeModal(partNum) {
     currentSelectedPart = partNum;
-    modalPartName.textContent = `Part ${partNum}`;
+    modalPartName.textContent = getPartLabel(partNum);
     const maxWords = allWords.filter(w => w.part == partNum).length;
     quizStart.max = maxWords;
     quizEnd.max = maxWords;
@@ -91,7 +102,7 @@ modeFlashcardsBtn.addEventListener('click', () => {
 function startFlashcards(partNum) {
     words = allWords.filter(w => w.part == partNum);
     currentIndex = 0;
-    partTitle.textContent = `Part ${partNum}`;
+    partTitle.textContent = getPartLabel(partNum);
     
     homeView.classList.add('hidden');
     flashcardView.classList.remove('hidden');
@@ -116,7 +127,7 @@ function renderCard() {
         <div class="flashcard" onclick="if(!event.target.closest('.translate-btn')) this.classList.toggle('flipped')">
             <div class="card-face card-front">
                 <div class="word-number" style="position: absolute; top: 20px; left: 20px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">
-                    Part ${wordObj.part} &bull; Word #${wordObj.num}
+                    ${getPartLabel(wordObj.part)} &bull; Word #${wordObj.num}
                 </div>
                 <h2>${wordObj.word}</h2>
             </div>
