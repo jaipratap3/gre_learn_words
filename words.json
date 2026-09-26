@@ -11174,5 +11174,49 @@
     "hindi_word": "",
     "hindi_desc": "",
     "easy_english": ""
+  },
+  {
+    "num": "19",
+    "part": "EXTRA",
+    "word": "SHORTCOMING",
+    "pos": "adj/n/v",
+    "description": "a failing or deficiency",
+    "hindi_meaning": "",
+    "hindi_word": "",
+    "hindi_desc": "",
+    "easy_english": ""
+  },
+  {
+    "num": "20",
+    "part": "EXTRA",
+    "word": "PALATABLE",
+    "pos": "adj/n/v",
+    "description": "acceptable to the taste or mind",
+    "hindi_meaning": "",
+    "hindi_word": "",
+    "hindi_desc": "",
+    "easy_english": ""
+  },
+  {
+    "num": "21",
+    "part": "EXTRA",
+    "word": "COLLUSION",
+    "pos": "adj/n/v",
+    "description": "relate with COLLiSION of alpha n beta particles in radioactive element experiments.. such experiments are done under secret . Secret agreement made between gov and scientist to perform this.",
+    "hindi_meaning": "",
+    "hindi_word": "",
+    "hindi_desc": "",
+    "easy_english": ""
+  },
+  {
+    "num": "22",
+    "part": "EXTRA",
+    "word": "CONTENTION",
+    "pos": "adj/n/v",
+    "description": "seeing dispute bewtween two is CONTENT for us. there is strong disagreement between them. Another meaning is contendor in competition to get a prize.",
+    "hindi_meaning": "",
+    "hindi_word": "",
+    "hindi_desc": "",
+    "easy_english": ""
   }
 ]
