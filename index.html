@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRE Flashcards</title>
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
     <div class="app-container">
@@ -119,15 +119,14 @@
                     <!-- 10s Countdown Recall Box -->
                     <div class="audio-timer-box" id="audio-timer-box">
                         <div class="audio-timer-circle" id="audio-timer-circle">
-                            <span id="audio-countdown-num">10</span>
-                            <span class="audio-countdown-label">sec to recall</span>
+                            <span id="audio-countdown-num">10s</span>
                         </div>
                         <button id="audio-reveal-btn" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.9rem; margin-top: 0.75rem;">
                             ⚡ Reveal &amp; Speak Now
                         </button>
                     </div>
 
-                    <!-- Mnemonic & Easy English Explanation Box -->
+                    <!-- Mnemonic & Meaning Box -->
                     <div class="audio-reveal-content hidden" id="audio-reveal-content">
                         <!-- Mnemonic Section (Top Priority) -->
                         <div class="audio-mnemonic-box hidden" id="audio-mnemonic-box">
@@ -135,15 +134,15 @@
                             <p id="audio-mnemonic-text"></p>
                         </div>
 
-                        <!-- Easy English Explanation (from Meaning & Translation) -->
+                        <!-- Meaning (Easy explanation) -->
                         <div class="audio-easy-box" id="audio-easy-box">
-                            <span class="audio-label">📖 Easy English Explanation:</span>
-                            <p id="audio-easy-text">Loading explanation...</p>
+                            <span class="audio-label">📖 Meaning:</span>
+                            <p id="audio-easy-text">Loading meaning...</p>
                         </div>
 
-                        <!-- Full Original Meaning -->
+                        <!-- Detailed Description -->
                         <div class="audio-meaning-box" id="audio-meaning-box">
-                            <span class="audio-label">Detailed Meaning:</span>
+                            <span class="audio-label">Detailed Context:</span>
                             <p id="audio-meaning-text"></p>
                         </div>
                     </div>
@@ -176,8 +175,8 @@
                     <div class="audio-setting-item">
                         <label for="audio-speed-select">⚡ Speed:</label>
                         <select id="audio-speed-select" class="audio-select">
-                            <option value="0.85">0.85x</option>
-                            <option value="1" selected>1.0x</option>
+                            <option value="0.85" selected>0.85x</option>
+                            <option value="1">1.0x</option>
                             <option value="1.15">1.15x</option>
                         </select>
                     </div>
@@ -256,6 +255,6 @@
     </div>
     <div id="sidebar-overlay" class="overlay hidden"></div>
 
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=13"></script>
 </body>
 </html>

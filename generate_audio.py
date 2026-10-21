@@ -77,16 +77,17 @@ def build_script_for_words(words_list, mnemonics_map, delay_ms=10000, pause_ms=2
             parts.append(f"GRE Flashcards, {part_label}. Let's begin. [[slnc 1500]]")
 
         word_num_str = f"Word {idx + 1}. "
-        # 1. Speak word
-        speech_chunk = f"{word_num_str}{word_text}. [[slnc {delay_ms}]] "
+        # 1. Speak word, wait half delay, speak word again, wait remaining delay
+        half_delay_ms = delay_ms // 2
+        speech_chunk = f"{word_num_str}{word_text}. [[slnc {half_delay_ms}]] {word_text}. [[slnc {half_delay_ms}]] "
 
         # 2. Speak mnemonic
         if mnemonic:
             speech_chunk += f"Mnemonic: {mnemonic}. "
 
-        # 3. Speak easy English explanation
+        # 3. Speak meaning (just "Meaning: ...")
         if easy_english:
-            speech_chunk += f"Easy explanation: {easy_english}. "
+            speech_chunk += f"Meaning: {easy_english}. "
         elif w.get("description"):
             speech_chunk += f"Meaning: {clean_text_for_speech(w.get('description'))}. "
 
@@ -152,7 +153,7 @@ def main():
     parser.add_argument("--delay", type=int, default=10, help="Recall delay in seconds (default: 10)")
     parser.add_argument("--pause", type=int, default=2, help="Pause between words in seconds (default: 2)")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of words for testing")
-    parser.add_argument("--voice", default="Jasper", help="Voice name (default: Jasper (en-IN), or Rishi, Aman, Samantha)")
+    parser.add_argument("--voice", default="Rishi", help="Voice name (default: Rishi (en-IN), or Jasper, Aman, Samantha)")
     parser.add_argument("--output-dir", default="audio", help="Output directory for audio files")
     args = parser.parse_args()
 

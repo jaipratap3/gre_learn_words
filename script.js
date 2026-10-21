@@ -913,10 +913,11 @@ function getSelectedVoice() {
         const found = availableVoices.find(v => v.name === selectedVoiceName);
         if (found) return found;
     }
-    // Default to Jasper (en-IN)
+    // Default priority: Rishi (en-IN), then Jasper (en-IN), then any en-IN voice
+    const rishi = availableVoices.find(v => /rishi/i.test(v.name));
+    if (rishi) return rishi;
     const jasper = availableVoices.find(v => /jasper/i.test(v.name));
     if (jasper) return jasper;
-    // Fallback to any en-IN / India voice (e.g. Aman, Rishi, Neerja, Google en-IN)
     const enIn = availableVoices.find(v => /en[-_]in/i.test(v.lang) || /india/i.test(v.name));
     if (enIn) return enIn;
     // Fallback to any English voice
@@ -936,10 +937,12 @@ function populateVoices() {
     const englishVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
     const list = englishVoices.length > 0 ? englishVoices : voices;
 
-    // Prioritize Jasper (en-IN) as default voice
-    let defaultVoice = list.find(v => /jasper/i.test(v.name));
+    // Prioritize Rishi (en-IN) as default voice, then Jasper (en-IN)
+    let defaultVoice = list.find(v => /rishi/i.test(v.name));
     if (!defaultVoice) {
-        // Fallback to Indian English (en-IN)
+        defaultVoice = list.find(v => /jasper/i.test(v.name));
+    }
+    if (!defaultVoice) {
         defaultVoice = list.find(v => /en[-_]in/i.test(v.lang) || /india/i.test(v.name));
     }
     if (!defaultVoice) {
@@ -1014,7 +1017,7 @@ function speakSpeech(text, onEndCallback) {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    const speed = parseFloat(audioSpeedSelect ? audioSpeedSelect.value : '1') || 1;
+    const speed = parseFloat(audioSpeedSelect ? audioSpeedSelect.value : '0.85') || 0.85;
     utterance.rate = speed;
 
     const voice = getSelectedVoice();
@@ -1052,13 +1055,15 @@ async function speakCardBack(word) {
         parts.push(`Mnemonic: ${cleanTextForSpeech(mnemonic)}`);
     }
     if (easyEnglish) {
-        parts.push(`Easy English explanation: ${cleanTextForSpeech(easyEnglish)}`);
+        parts.push(`Meaning: ${cleanTextForSpeech(easyEnglish)}`);
     } else if (wordObj && wordObj.description) {
         parts.push(`Meaning: ${cleanTextForSpeech(wordObj.description)}`);
     }
 
     speakSpeech(parts.join('. '));
 }
+
+let wordRepeatedInRecall = false;
 
 function playAudioWord(index) {
     stopAudioTimersAndSpeech();
@@ -1072,6 +1077,7 @@ function playAudioWord(index) {
     }
 
     audioIndex = index;
+    wordRepeatedInRecall = false;
     const wordObj = audioWords[audioIndex];
     const mnemonic = mnemonicsMap[wordObj.word.toUpperCase()] || '';
 
@@ -1086,7 +1092,7 @@ function playAudioWord(index) {
 
     audioMeaningText.textContent = wordObj.description;
     if (audioEasyText) {
-        audioEasyText.textContent = 'Loading explanation...';
+        audioEasyText.textContent = 'Loading meaning...';
     }
     if (mnemonic) {
         audioMnemonicText.textContent = mnemonic;
@@ -1095,10 +1101,10 @@ function playAudioWord(index) {
         audioMnemonicBox.classList.add('hidden');
     }
 
-    // Reset countdown display
+    // Reset countdown display (clean seconds timer)
     const delaySec = parseInt(audioDelaySelect ? audioDelaySelect.value : '10', 10) || 10;
     remainingRecallSeconds = delaySec;
-    audioCountdownNum.textContent = remainingRecallSeconds;
+    audioCountdownNum.textContent = `${remainingRecallSeconds}s`;
     audioTimerCircle.classList.remove('active-pulse');
     audioTimerBox.classList.remove('hidden');
     audioRevealContent.classList.add('hidden');
@@ -1120,21 +1126,36 @@ function playAudioWord(index) {
 
 function startRecallCountdown() {
     currentPhase = 'RECALL_WAIT';
-    updateAudioStatus('waiting', '⏳', `Recall meaning! (${remainingRecallSeconds}s)`);
+    updateAudioStatus('waiting', '⏳', `Recall time: ${remainingRecallSeconds}s`);
     audioTimerCircle.classList.add('active-pulse');
+
+    const wordObj = audioWords[audioIndex];
+    const delaySec = parseInt(audioDelaySelect ? audioDelaySelect.value : '10', 10) || 10;
+    const halfway = Math.floor(delaySec / 2);
 
     audioTimerInterval = setInterval(() => {
         if (!isAudioPlaying) return;
 
         remainingRecallSeconds--;
-        audioCountdownNum.textContent = Math.max(0, remainingRecallSeconds);
+        audioCountdownNum.textContent = `${Math.max(0, remainingRecallSeconds)}s`;
+
+        // Repeat the word within the recall window (halfway through delay)
+        if (!wordRepeatedInRecall && remainingRecallSeconds === halfway && remainingRecallSeconds >= 2) {
+            wordRepeatedInRecall = true;
+            updateAudioStatus('speaking', '🔊', `"${wordObj.word}"`);
+            speakSpeech(wordObj.word, () => {
+                if (currentPhase === 'RECALL_WAIT' && isAudioPlaying) {
+                    updateAudioStatus('waiting', '⏳', `Recall time: ${remainingRecallSeconds}s`);
+                }
+            });
+        }
 
         if (remainingRecallSeconds <= 0) {
             clearInterval(audioTimerInterval);
             audioTimerInterval = null;
             revealAndSpeakMeaning();
-        } else {
-            updateAudioStatus('waiting', '⏳', `Recall meaning! (${remainingRecallSeconds}s)`);
+        } else if (!wordRepeatedInRecall || remainingRecallSeconds < halfway) {
+            updateAudioStatus('waiting', '⏳', `Recall time: ${remainingRecallSeconds}s`);
         }
     }, 1000);
 }
@@ -1153,15 +1174,15 @@ async function revealAndSpeakMeaning() {
     const mnemonic = mnemonicsMap[wordObj.word.toUpperCase()] || '';
     const shouldSpeakMnemonic = audioSpeakMnemonic ? audioSpeakMnemonic.checked : true;
 
-    updateAudioStatus('speaking', '📖', 'Speaking Mnemonic & Easy Meaning...');
+    updateAudioStatus('speaking', '📖', 'Speaking Mnemonic & Meaning...');
 
     // Retrieve Easy English Explanation
     const easyEnglish = await fetchEasyEnglish(wordObj.word, wordObj);
     if (audioEasyText) {
-        audioEasyText.textContent = easyEnglish || 'No simple explanation available.';
+        audioEasyText.textContent = easyEnglish || wordObj.description || 'Not available.';
     }
 
-    // Build speech string: Mnemonic first, then easy English explanation!
+    // Build speech string: Mnemonic first, then Meaning (without saying "easy English explanation")
     let speechParts = [];
 
     if (mnemonic && shouldSpeakMnemonic) {
@@ -1169,7 +1190,7 @@ async function revealAndSpeakMeaning() {
     }
 
     if (easyEnglish) {
-        speechParts.push(`Easy English explanation: ${cleanTextForSpeech(easyEnglish)}`);
+        speechParts.push(`Meaning: ${cleanTextForSpeech(easyEnglish)}`);
     } else if (wordObj.description) {
         speechParts.push(`Meaning: ${cleanTextForSpeech(wordObj.description)}`);
     }
