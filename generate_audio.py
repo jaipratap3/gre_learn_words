@@ -33,15 +33,43 @@ def clean_text_for_speech(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
+def resolve_voice(requested_voice):
+    if not requested_voice:
+        return None
+    try:
+        res = subprocess.run(["say", "-v", "?"], capture_output=True, text=True)
+        available = res.stdout
+        for line in available.splitlines():
+            name = line.split()[0] if line.split() else ""
+            if requested_voice.lower() == name.lower():
+                return name
+        # If requested was Jasper or an en-IN voice, try Rishi or Aman on macOS
+        if "jasper" in requested_voice.lower() or "in" in requested_voice.lower():
+            for backup in ["Rishi", "Aman", "Samantha"]:
+                if backup in available:
+                    print(f"   ℹ️ Voice '{requested_voice}' not found in macOS say, using '{backup}' (en-IN).")
+                    return backup
+    except Exception:
+        pass
+    return requested_voice
+
 def build_script_for_words(words_list, mnemonics_map, delay_ms=10000, pause_ms=2000):
     """
     Builds macOS `say` script string with embedded [[slnc <ms>]] silence tags.
+    Speaks: Word -> 10s recall pause -> Mnemonic -> Easy English Explanation -> 2s pause.
     """
     parts = []
     for idx, w in enumerate(words_list):
         word_text = w.get("word", "").strip()
-        meaning = clean_text_for_speech(w.get("description", ""))
         mnemonic = clean_text_for_speech(mnemonics_map.get(word_text.upper(), ""))
+        
+        # Easy English explanation: from easy_english or concise sentence from description
+        easy_english = clean_text_for_speech(w.get("easy_english", ""))
+        if easy_english.lower().startswith("simple synonyms:"):
+            easy_english = easy_english[16:].strip()
+            
+        if not easy_english and w.get("description"):
+            easy_english = clean_text_for_speech(w.get("description", "").split(".")[0].strip())
 
         # Part announcement at start
         if idx == 0:
@@ -52,12 +80,15 @@ def build_script_for_words(words_list, mnemonics_map, delay_ms=10000, pause_ms=2
         # 1. Speak word
         speech_chunk = f"{word_num_str}{word_text}. [[slnc {delay_ms}]] "
 
-        # 2. Speak meaning
-        speech_chunk += f"Meaning: {meaning}. "
-
-        # 3. Speak mnemonic if available
+        # 2. Speak mnemonic
         if mnemonic:
             speech_chunk += f"Mnemonic: {mnemonic}. "
+
+        # 3. Speak easy English explanation
+        if easy_english:
+            speech_chunk += f"Easy explanation: {easy_english}. "
+        elif w.get("description"):
+            speech_chunk += f"Meaning: {clean_text_for_speech(w.get('description'))}. "
 
         # 4. Short pause before next word
         speech_chunk += f"[[slnc {pause_ms}]] "
@@ -94,10 +125,11 @@ def generate_part_audio(part_name, words, mnemonics, output_dir, delay_sec=10, p
     try:
         # Step 1: Synthesize with macOS say
         cmd_say = ["say", "-f", txt_path, "-o", aiff_path]
-        if voice:
-            cmd_say.extend(["-v", voice])
+        chosen_voice = resolve_voice(voice)
+        if chosen_voice:
+            cmd_say.extend(["-v", chosen_voice])
 
-        print(f"   🎙 Synthesizing speech with macOS say...")
+        print(f"   🎙 Synthesizing speech with macOS say (voice: {chosen_voice or 'default'})...")
         subprocess.run(cmd_say, check=True)
 
         # Step 2: Convert to compressed AAC .m4a using afconvert
@@ -120,7 +152,7 @@ def main():
     parser.add_argument("--delay", type=int, default=10, help="Recall delay in seconds (default: 10)")
     parser.add_argument("--pause", type=int, default=2, help="Pause between words in seconds (default: 2)")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of words for testing")
-    parser.add_argument("--voice", default="Samantha", help="Voice name (e.g. Samantha, Daniel, Alex)")
+    parser.add_argument("--voice", default="Jasper", help="Voice name (default: Jasper (en-IN), or Rishi, Aman, Samantha)")
     parser.add_argument("--output-dir", default="audio", help="Output directory for audio files")
     args = parser.parse_args()
 

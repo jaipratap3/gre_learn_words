@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRE Flashcards</title>
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
     <div class="app-container">
@@ -127,15 +127,24 @@
                         </button>
                     </div>
 
-                    <!-- Meaning & Mnemonic Box -->
+                    <!-- Mnemonic & Easy English Explanation Box -->
                     <div class="audio-reveal-content hidden" id="audio-reveal-content">
-                        <div class="audio-meaning-box">
-                            <span class="audio-label">Meaning:</span>
-                            <p id="audio-meaning-text"></p>
-                        </div>
+                        <!-- Mnemonic Section (Top Priority) -->
                         <div class="audio-mnemonic-box hidden" id="audio-mnemonic-box">
                             <span class="audio-label">💡 Mnemonic:</span>
                             <p id="audio-mnemonic-text"></p>
+                        </div>
+
+                        <!-- Easy English Explanation (from Meaning & Translation) -->
+                        <div class="audio-easy-box" id="audio-easy-box">
+                            <span class="audio-label">📖 Easy English Explanation:</span>
+                            <p id="audio-easy-text">Loading explanation...</p>
+                        </div>
+
+                        <!-- Full Original Meaning -->
+                        <div class="audio-meaning-box" id="audio-meaning-box">
+                            <span class="audio-label">Detailed Meaning:</span>
+                            <p id="audio-meaning-text"></p>
                         </div>
                     </div>
                 </div>
@@ -247,6 +256,6 @@
     </div>
     <div id="sidebar-overlay" class="overlay hidden"></div>
 
-    <script src="script.js?v=11"></script>
+    <script src="script.js?v=12"></script>
 </body>
 </html>

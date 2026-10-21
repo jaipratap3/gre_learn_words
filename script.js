@@ -314,10 +314,18 @@ function renderCard() {
                     ${getPartLabel(wordObj.part)} &bull; Word #${wordObj.num}
                 </div>
                 <h2>${wordObj.word}</h2>
+                <button onclick="event.stopPropagation(); speakWordCard('${wordObj.word}')" class="translate-btn" style="position: absolute; bottom: 20px; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    🔊 Pronounce
+                </button>
             </div>
             <div class="card-face card-back">
                 <div class="pos">${wordObj.pos}</div>
                 <div class="description">${wordObj.description}</div>
+                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.8rem;">
+                    <button onclick="event.stopPropagation(); speakCardBack('${wordObj.word}')" class="translate-btn" style="background: rgba(139, 92, 246, 0.2); border-color: #a855f7; color: #c084fc; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0;">
+                        🔊 Speak Mnemonic &amp; Easy Meaning
+                    </button>
+                </div>
                 ${mnemonicsMap[wordObj.word.toUpperCase()] ? `
                 <div class="mnemonic-section" style="margin-top: 1rem; width: 100%;">
                     <button onclick="event.stopPropagation(); this.style.display='none'; this.nextElementSibling.style.display='block';" class="translate-btn" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #a855f7;">
@@ -823,6 +831,8 @@ const audioRevealBtn = document.getElementById('audio-reveal-btn');
 
 const audioRevealContent = document.getElementById('audio-reveal-content');
 const audioMeaningText = document.getElementById('audio-meaning-text');
+const audioEasyBox = document.getElementById('audio-easy-box');
+const audioEasyText = document.getElementById('audio-easy-text');
 const audioMnemonicBox = document.getElementById('audio-mnemonic-box');
 const audioMnemonicText = document.getElementById('audio-mnemonic-text');
 
@@ -848,6 +858,71 @@ let currentPhase = 'IDLE'; // 'SPEAKING_WORD', 'RECALL_WAIT', 'SPEAKING_MEANING'
 let remainingRecallSeconds = 10;
 let availableVoices = [];
 
+// Cache for Easy English Explanations (Datamuse dictionary API / words.json)
+const easyEnglishCache = {};
+
+async function fetchEasyEnglish(word, wordObj) {
+    if (!word) return '';
+    const key = word.toUpperCase();
+    if (easyEnglishCache[key]) {
+        return easyEnglishCache[key];
+    }
+
+    // 1. Fetch from Datamuse dictionary API (which powers Meaning & Translation -> Easy English Explanation)
+    try {
+        const defUrl = `https://api.datamuse.com/words?sp=${encodeURIComponent(word)}&md=d&max=1`;
+        const res = await fetch(defUrl);
+        const data = await res.json();
+        if (data && data.length > 0 && data[0].defs && data[0].defs.length > 0) {
+            const defs = data[0].defs;
+            const cleanDef = defs[0].split('\t')[1] || defs[0];
+            if (cleanDef) {
+                easyEnglishCache[key] = cleanDef;
+                return cleanDef;
+            }
+        }
+    } catch (e) {
+        console.warn('Could not fetch definition from Datamuse:', e);
+    }
+
+    // 2. Fallback: check if wordObj has easy_english in words.json
+    if (wordObj && wordObj.easy_english) {
+        let clean = wordObj.easy_english.replace(/^Simple synonyms:\s*/i, '').trim();
+        if (clean) {
+            easyEnglishCache[key] = clean;
+            return clean;
+        }
+    }
+
+    // 3. Fallback: extract the concise first sentence from description
+    if (wordObj && wordObj.description) {
+        const firstSentence = wordObj.description.split('.')[0].trim();
+        easyEnglishCache[key] = firstSentence ? `${firstSentence}.` : wordObj.description;
+        return easyEnglishCache[key];
+    }
+
+    return '';
+}
+
+function getSelectedVoice() {
+    if (availableVoices.length === 0 && 'speechSynthesis' in window) {
+        availableVoices = window.speechSynthesis.getVoices() || [];
+    }
+    const selectedVoiceName = audioVoiceSelect ? audioVoiceSelect.value : '';
+    if (selectedVoiceName && availableVoices.length > 0) {
+        const found = availableVoices.find(v => v.name === selectedVoiceName);
+        if (found) return found;
+    }
+    // Default to Jasper (en-IN)
+    const jasper = availableVoices.find(v => /jasper/i.test(v.name));
+    if (jasper) return jasper;
+    // Fallback to any en-IN / India voice (e.g. Aman, Rishi, Neerja, Google en-IN)
+    const enIn = availableVoices.find(v => /en[-_]in/i.test(v.lang) || /india/i.test(v.name));
+    if (enIn) return enIn;
+    // Fallback to any English voice
+    return availableVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('en')) || availableVoices[0] || null;
+}
+
 function populateVoices() {
     if (!('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();
@@ -856,18 +931,29 @@ function populateVoices() {
 
     if (!audioVoiceSelect) return;
     const previousSelection = audioVoiceSelect.value;
-    audioVoiceSelect.innerHTML = '<option value="">Default Voice</option>';
+    audioVoiceSelect.innerHTML = '';
 
     const englishVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
     const list = englishVoices.length > 0 ? englishVoices : voices;
+
+    // Prioritize Jasper (en-IN) as default voice
+    let defaultVoice = list.find(v => /jasper/i.test(v.name));
+    if (!defaultVoice) {
+        // Fallback to Indian English (en-IN)
+        defaultVoice = list.find(v => /en[-_]in/i.test(v.lang) || /india/i.test(v.name));
+    }
+    if (!defaultVoice) {
+        defaultVoice = list.find(v => /samantha|daniel|alex|natural/i.test(v.name)) || list[0];
+    }
 
     list.forEach(v => {
         const option = document.createElement('option');
         option.value = v.name;
         option.textContent = `${v.name} (${v.lang})`;
-        if (!previousSelection && /samantha|daniel|google us|alex/i.test(v.name)) {
-            option.selected = true;
-        } else if (v.name === previousSelection) {
+
+        if (previousSelection) {
+            if (v.name === previousSelection) option.selected = true;
+        } else if (defaultVoice && v.name === defaultVoice.name) {
             option.selected = true;
         }
         audioVoiceSelect.appendChild(option);
@@ -931,11 +1017,8 @@ function speakSpeech(text, onEndCallback) {
     const speed = parseFloat(audioSpeedSelect ? audioSpeedSelect.value : '1') || 1;
     utterance.rate = speed;
 
-    const selectedVoiceName = audioVoiceSelect ? audioVoiceSelect.value : '';
-    if (selectedVoiceName && availableVoices.length > 0) {
-        const found = availableVoices.find(v => v.name === selectedVoiceName);
-        if (found) utterance.voice = found;
-    }
+    const voice = getSelectedVoice();
+    if (voice) utterance.voice = voice;
 
     utterance.onend = () => {
         if (onEndCallback && isAudioPlaying) {
@@ -944,7 +1027,6 @@ function speakSpeech(text, onEndCallback) {
     };
 
     utterance.onerror = (e) => {
-        // If canceled deliberately, do nothing
         if (e.error === 'interrupted' || e.error === 'canceled') return;
         if (onEndCallback && isAudioPlaying) {
             onEndCallback();
@@ -952,6 +1034,30 @@ function speakSpeech(text, onEndCallback) {
     };
 
     window.speechSynthesis.speak(utterance);
+}
+
+// Flashcard study mode audio triggers
+function speakWordCard(word) {
+    if (!word) return;
+    speakSpeech(word);
+}
+
+async function speakCardBack(word) {
+    const wordObj = words.find(w => w.word.toUpperCase() === word.toUpperCase()) || words[currentIndex];
+    const mnemonic = mnemonicsMap[word.toUpperCase()] || '';
+    const easyEnglish = await fetchEasyEnglish(word, wordObj);
+
+    let parts = [];
+    if (mnemonic) {
+        parts.push(`Mnemonic: ${cleanTextForSpeech(mnemonic)}`);
+    }
+    if (easyEnglish) {
+        parts.push(`Easy English explanation: ${cleanTextForSpeech(easyEnglish)}`);
+    } else if (wordObj && wordObj.description) {
+        parts.push(`Meaning: ${cleanTextForSpeech(wordObj.description)}`);
+    }
+
+    speakSpeech(parts.join('. '));
 }
 
 function playAudioWord(index) {
@@ -969,6 +1075,9 @@ function playAudioWord(index) {
     const wordObj = audioWords[audioIndex];
     const mnemonic = mnemonicsMap[wordObj.word.toUpperCase()] || '';
 
+    // Start background prefetch of easy English definition right away so it is ready
+    fetchEasyEnglish(wordObj.word, wordObj);
+
     // Update UI elements
     audioProgress.textContent = `Word ${audioIndex + 1} of ${audioWords.length}`;
     audioPartTag.textContent = `${getPartLabel(wordObj.part)} • #${wordObj.num}`;
@@ -976,6 +1085,9 @@ function playAudioWord(index) {
     audioPosTag.textContent = wordObj.pos || '';
 
     audioMeaningText.textContent = wordObj.description;
+    if (audioEasyText) {
+        audioEasyText.textContent = 'Loading explanation...';
+    }
     if (mnemonic) {
         audioMnemonicText.textContent = mnemonic;
         audioMnemonicBox.classList.remove('hidden');
@@ -1027,7 +1139,7 @@ function startRecallCountdown() {
     }, 1000);
 }
 
-function revealAndSpeakMeaning() {
+async function revealAndSpeakMeaning() {
     if (audioTimerInterval) {
         clearInterval(audioTimerInterval);
         audioTimerInterval = null;
@@ -1041,14 +1153,30 @@ function revealAndSpeakMeaning() {
     const mnemonic = mnemonicsMap[wordObj.word.toUpperCase()] || '';
     const shouldSpeakMnemonic = audioSpeakMnemonic ? audioSpeakMnemonic.checked : true;
 
-    updateAudioStatus('speaking', '📖', 'Speaking Meaning & Mnemonic...');
+    updateAudioStatus('speaking', '📖', 'Speaking Mnemonic & Easy Meaning...');
 
-    let speechString = `Meaning: ${cleanTextForSpeech(wordObj.description)}`;
-    if (mnemonic && shouldSpeakMnemonic) {
-        speechString += `. Mnemonic: ${cleanTextForSpeech(mnemonic)}`;
+    // Retrieve Easy English Explanation
+    const easyEnglish = await fetchEasyEnglish(wordObj.word, wordObj);
+    if (audioEasyText) {
+        audioEasyText.textContent = easyEnglish || 'No simple explanation available.';
     }
 
-    speakSpeech(speechString, () => {
+    // Build speech string: Mnemonic first, then easy English explanation!
+    let speechParts = [];
+
+    if (mnemonic && shouldSpeakMnemonic) {
+        speechParts.push(`Mnemonic: ${cleanTextForSpeech(mnemonic)}`);
+    }
+
+    if (easyEnglish) {
+        speechParts.push(`Easy English explanation: ${cleanTextForSpeech(easyEnglish)}`);
+    } else if (wordObj.description) {
+        speechParts.push(`Meaning: ${cleanTextForSpeech(wordObj.description)}`);
+    }
+
+    const fullSpeechText = speechParts.join('. ');
+
+    speakSpeech(fullSpeechText, () => {
         updateAudioStatus('done', '✅', 'Word Finished');
         const autoAdvance = audioAutoAdvance ? audioAutoAdvance.checked : true;
 
