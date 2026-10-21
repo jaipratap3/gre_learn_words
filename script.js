@@ -1230,6 +1230,12 @@ function startAudioMode(partNum, startWordNum = null, endWordNum = null, specifi
     if (matchView) matchView.classList.add('hidden');
     audioView.classList.remove('hidden');
 
+    const audioDownloadLink = document.getElementById('audio-download-link');
+    if (audioDownloadLink) {
+        audioDownloadLink.href = `audio/part_${String(partNum).toLowerCase()}.m4a`;
+        audioDownloadLink.download = `part_${String(partNum).toLowerCase()}.m4a`;
+    }
+
     populateVoices();
     setPlayPauseUI(true);
     playAudioWord(audioIndex);
