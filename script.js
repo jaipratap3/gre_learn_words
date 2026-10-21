@@ -1010,7 +1010,7 @@ function speakSpeech(text, onEndCallback) {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    const speed = parseFloat(audioSpeedSelect ? audioSpeedSelect.value : '0.85') || 0.85;
+    const speed = parseFloat(audioSpeedSelect ? audioSpeedSelect.value : '0.6') || 0.6;
     utterance.rate = speed;
 
     const voice = getSelectedVoice();

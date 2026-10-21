@@ -97,7 +97,7 @@ def build_script_for_words(words_list, mnemonics_map, delay_ms=10000, pause_ms=2
 
     return "\n".join(parts)
 
-def generate_part_audio(part_name, words, mnemonics, output_dir, delay_sec=10, pause_sec=2, voice=None, limit=None):
+def generate_part_audio(part_name, words, mnemonics, output_dir, delay_sec=10, pause_sec=2, voice=None, limit=None, speed=0.6):
     os.makedirs(output_dir, exist_ok=True)
     part_words = [w for w in words if str(w.get("part", "")).upper() == str(part_name).upper()]
     if limit and limit > 0:
@@ -111,7 +111,7 @@ def generate_part_audio(part_name, words, mnemonics, output_dir, delay_sec=10, p
     out_path = os.path.join(output_dir, out_filename)
 
     print(f"\n🎧 Generating audio for Part {part_name} ({len(part_words)} words)...")
-    print(f"   ⏱ Recall delay: {delay_sec}s | Pause between words: {pause_sec}s")
+    print(f"   ⏱ Recall delay: {delay_sec}s | Pause between words: {pause_sec}s | Speed: {speed}x")
 
     delay_ms = int(delay_sec * 1000)
     pause_ms = int(pause_sec * 1000)
@@ -129,8 +129,11 @@ def generate_part_audio(part_name, words, mnemonics, output_dir, delay_sec=10, p
         chosen_voice = resolve_voice(voice)
         if chosen_voice:
             cmd_say.extend(["-v", chosen_voice])
+        if speed and speed > 0:
+            wpm = int(175 * speed)
+            cmd_say.extend(["-r", str(wpm)])
 
-        print(f"   🎙 Synthesizing speech with macOS say (voice: {chosen_voice or 'default'})...")
+        print(f"   🎙 Synthesizing speech with macOS say (voice: {chosen_voice or 'default'}, speed: {speed}x)...")
         subprocess.run(cmd_say, check=True)
 
         # Step 2: Convert to compressed AAC .m4a using afconvert
@@ -154,6 +157,7 @@ def main():
     parser.add_argument("--pause", type=int, default=2, help="Pause between words in seconds (default: 2)")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of words for testing")
     parser.add_argument("--voice", default="Rishi", help="Voice name (default: Rishi (en-IN), or Jasper, Aman, Samantha)")
+    parser.add_argument("--speed", type=float, default=0.6, help="Playback speed multiplier (default: 0.6)")
     parser.add_argument("--output-dir", default="audio", help="Output directory for audio files")
     args = parser.parse_args()
 
@@ -182,7 +186,8 @@ def main():
             delay_sec=args.delay,
             pause_sec=args.pause,
             voice=args.voice,
-            limit=args.limit
+            limit=args.limit,
+            speed=args.speed
         )
 
     print("\n🎉 Done! All audio generation complete.")
