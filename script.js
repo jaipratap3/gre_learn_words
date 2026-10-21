@@ -306,6 +306,8 @@ backBtn.addEventListener('click', () => {
 
 function renderCard() {
     const wordObj = words[currentIndex];
+    const wordKey = (wordObj.word || '').trim().toUpperCase();
+    const mnemonic = mnemonicsMap[wordKey] || mnemonicsMap[wordObj.word] || '';
     
     flashcardContainer.innerHTML = `
         <div class="flashcard" onclick="if(!event.target.closest('.translate-btn')) this.classList.toggle('flipped')">
@@ -318,13 +320,13 @@ function renderCard() {
             <div class="card-face card-back">
                 <div class="pos">${wordObj.pos}</div>
                 <div class="description">${wordObj.description}</div>
-                ${mnemonicsMap[wordObj.word.toUpperCase()] ? `
+                ${mnemonic ? `
                 <div class="mnemonic-section" style="margin-top: 1rem; width: 100%;">
                     <button onclick="event.stopPropagation(); this.style.display='none'; this.nextElementSibling.style.display='block';" class="translate-btn" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #a855f7;">
                         💡 Show Mnemonic
                     </button>
                     <div style="display: none; padding: 1rem; background: rgba(168, 85, 247, 0.1); border-radius: 8px; border-left: 4px solid #a855f7; text-align: left; font-size: 0.95rem; margin-top: 0.5rem;">
-                        <strong>Mnemonic:</strong> ${mnemonicsMap[wordObj.word.toUpperCase()]}
+                        <strong>Mnemonic:</strong> ${escapeHtml(mnemonic)}
                     </div>
                 </div>
                 ` : ''}
