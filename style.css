@@ -796,3 +796,279 @@ header p {
     font-size: 0.95rem;
 }
 
+/* ============================================================
+   AUDIO STUDY MODE STYLES
+   ============================================================ */
+.audio-card-container {
+    width: 100%;
+}
+
+.audio-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    min-height: 380px;
+    justify-content: center;
+}
+
+.audio-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1.1rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #c084fc;
+    transition: all 0.3s ease;
+}
+
+.audio-status-badge.waiting {
+    background: rgba(234, 179, 8, 0.15);
+    border-color: rgba(234, 179, 8, 0.4);
+    color: #facc15;
+}
+
+.audio-status-badge.speaking {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+}
+
+.audio-status-badge.paused {
+    background: rgba(148, 163, 184, 0.15);
+    border-color: rgba(148, 163, 184, 0.4);
+    color: #94a3b8;
+}
+
+.audio-status-badge.done {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+}
+
+.audio-word-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.audio-part-tag {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+}
+
+.audio-word-header h2 {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+    margin: 0.2rem 0;
+}
+
+.audio-pos-tag {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.audio-timer-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0.75rem 0;
+}
+
+.audio-timer-circle {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 3px solid rgba(234, 179, 8, 0.4);
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(234, 179, 8, 0.05);
+    transition: all 0.3s ease;
+}
+
+.audio-timer-circle.active-pulse {
+    border-color: #facc15;
+    box-shadow: 0 0 25px rgba(250, 204, 21, 0.45);
+    animation: timerPulse 1s infinite alternate ease-in-out;
+}
+
+@keyframes timerPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.04); }
+}
+
+#audio-countdown-num {
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #facc15;
+}
+
+.audio-countdown-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+.audio-reveal-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: left;
+    margin-top: 0.5rem;
+    animation: fadeInReveal 0.4s ease-out;
+}
+
+@keyframes fadeInReveal {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.audio-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+}
+
+.audio-meaning-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.audio-mnemonic-box {
+    background: rgba(168, 85, 247, 0.1);
+    border-left: 4px solid #a855f7;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.audio-mnemonic-box .audio-label {
+    color: #c084fc;
+}
+
+.audio-controls-panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    align-items: center;
+}
+
+.audio-main-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.audio-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    backdrop-filter: blur(10px);
+}
+
+.audio-setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.audio-setting-item label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.audio-select {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+}
+
+:root.light-theme .audio-select {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.audio-toggles {
+    display: flex;
+    flex-direction: row;
+    gap: 0.85rem;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0.3rem;
+}
+
+.audio-toggles label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+:root.light-theme .audio-meaning-box {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+:root.light-theme .audio-timer-circle {
+    background: rgba(234, 179, 8, 0.1);
+}
+
+

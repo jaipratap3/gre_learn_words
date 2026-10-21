@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRE Flashcards</title>
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
     <div class="app-container">
@@ -36,6 +36,7 @@
         <div id="flashcard-view" class="view hidden container">
             <header style="position: relative; width: 100%;">
                 <button id="back-btn" class="btn btn-outline" style="position: absolute; left: 0; top: 0;">&larr; Back</button>
+                <button id="flashcard-audio-btn" class="btn btn-outline" style="position: absolute; right: 0; top: 0; display: flex; align-items: center; gap: 0.4rem;">🎧 Audio</button>
                 <h1 id="part-title">Flashcards</h1>
                 <p>1000 Most Important Words</p>
             </header>
@@ -91,6 +92,103 @@
             
             <button id="match-next-btn" class="btn hidden" style="margin-top: 2rem; width: 100%; max-width: 300px;">Next 5 Words</button>
         </div>
+
+        <!-- AUDIO STUDY VIEW -->
+        <div id="audio-view" class="view hidden container" style="max-width: 750px;">
+            <header style="position: relative; width: 100%;">
+                <button id="audio-back-btn" class="btn btn-outline" style="position: absolute; left: 0; top: 0;">&larr; Back</button>
+                <h1 id="audio-part-title">Audio Study</h1>
+                <p id="audio-progress">Word 1 of 150</p>
+            </header>
+
+            <div class="audio-card-container">
+                <div class="audio-card">
+                    <!-- Status Header -->
+                    <div class="audio-status-badge" id="audio-status-badge">
+                        <span id="audio-status-icon">🔊</span>
+                        <span id="audio-status-text">Speaking Word...</span>
+                    </div>
+
+                    <!-- Word Info -->
+                    <div class="audio-word-header">
+                        <span class="audio-part-tag" id="audio-part-tag">Part 1 &bull; #1</span>
+                        <h2 id="audio-current-word">WORD</h2>
+                        <span class="audio-pos-tag" id="audio-pos-tag">adjective</span>
+                    </div>
+
+                    <!-- 10s Countdown Recall Box -->
+                    <div class="audio-timer-box" id="audio-timer-box">
+                        <div class="audio-timer-circle" id="audio-timer-circle">
+                            <span id="audio-countdown-num">10</span>
+                            <span class="audio-countdown-label">sec to recall</span>
+                        </div>
+                        <button id="audio-reveal-btn" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.9rem; margin-top: 0.75rem;">
+                            ⚡ Reveal &amp; Speak Now
+                        </button>
+                    </div>
+
+                    <!-- Meaning & Mnemonic Box -->
+                    <div class="audio-reveal-content hidden" id="audio-reveal-content">
+                        <div class="audio-meaning-box">
+                            <span class="audio-label">Meaning:</span>
+                            <p id="audio-meaning-text"></p>
+                        </div>
+                        <div class="audio-mnemonic-box hidden" id="audio-mnemonic-box">
+                            <span class="audio-label">💡 Mnemonic:</span>
+                            <p id="audio-mnemonic-text"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="audio-controls-panel">
+                <div class="audio-main-controls">
+                    <button id="audio-prev-btn" class="btn btn-outline" title="Previous Word">⏮ Prev</button>
+                    <button id="audio-play-pause-btn" class="btn" style="padding: 0.8rem 2rem; font-size: 1.1rem; min-width: 130px; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <span id="audio-play-icon">⏸</span>
+                        <span id="audio-play-text">Pause</span>
+                    </button>
+                    <button id="audio-replay-btn" class="btn btn-outline" title="Replay Current Word">🔄 Replay</button>
+                    <button id="audio-next-btn" class="btn btn-outline" title="Next Word">Next ⏭</button>
+                </div>
+
+                <!-- Settings -->
+                <div class="audio-settings-grid">
+                    <div class="audio-setting-item">
+                        <label for="audio-delay-select">⏱ Recall Delay:</label>
+                        <select id="audio-delay-select" class="audio-select">
+                            <option value="5">5 seconds</option>
+                            <option value="10" selected>10 seconds</option>
+                            <option value="15">15 seconds</option>
+                            <option value="20">20 seconds</option>
+                        </select>
+                    </div>
+                    <div class="audio-setting-item">
+                        <label for="audio-speed-select">⚡ Speed:</label>
+                        <select id="audio-speed-select" class="audio-select">
+                            <option value="0.85">0.85x</option>
+                            <option value="1" selected>1.0x</option>
+                            <option value="1.15">1.15x</option>
+                        </select>
+                    </div>
+                    <div class="audio-setting-item">
+                        <label for="audio-voice-select">🎙 Voice:</label>
+                        <select id="audio-voice-select" class="audio-select">
+                            <option value="">Default Voice</option>
+                        </select>
+                    </div>
+                    <div class="audio-setting-item audio-toggles">
+                        <label title="Speak mnemonic if available">
+                            <input type="checkbox" id="audio-speak-mnemonic" checked> Mnemonic
+                        </label>
+                        <label title="Automatically advance to next word">
+                            <input type="checkbox" id="audio-auto-advance" checked> Auto Next
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- MODE MODAL -->
@@ -101,6 +199,9 @@
             
             <div class="modal-options">
                 <button id="mode-flashcards-btn" class="btn">Study Flashcards</button>
+                <button id="mode-audio-btn" class="btn" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <span>🎧</span> Audio Study (Listen &amp; Recall)
+                </button>
                 
                 <div class="quiz-setup">
                     <label>Test me on word numbers:</label>
@@ -146,6 +247,6 @@
     </div>
     <div id="sidebar-overlay" class="overlay hidden"></div>
 
-    <script src="script.js?v=10"></script>
+    <script src="script.js?v=11"></script>
 </body>
 </html>
