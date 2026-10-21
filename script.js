@@ -314,18 +314,10 @@ function renderCard() {
                     ${getPartLabel(wordObj.part)} &bull; Word #${wordObj.num}
                 </div>
                 <h2>${wordObj.word}</h2>
-                <button onclick="event.stopPropagation(); speakWordCard('${wordObj.word}')" class="translate-btn" style="position: absolute; bottom: 20px; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem;">
-                    🔊 Pronounce
-                </button>
             </div>
             <div class="card-face card-back">
                 <div class="pos">${wordObj.pos}</div>
                 <div class="description">${wordObj.description}</div>
-                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.8rem;">
-                    <button onclick="event.stopPropagation(); speakCardBack('${wordObj.word}')" class="translate-btn" style="background: rgba(139, 92, 246, 0.2); border-color: #a855f7; color: #c084fc; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0;">
-                        🔊 Speak Mnemonic &amp; Easy Meaning
-                    </button>
-                </div>
                 ${mnemonicsMap[wordObj.word.toUpperCase()] ? `
                 <div class="mnemonic-section" style="margin-top: 1rem; width: 100%;">
                     <button onclick="event.stopPropagation(); this.style.display='none'; this.nextElementSibling.style.display='block';" class="translate-btn" style="background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #a855f7;">
@@ -814,7 +806,6 @@ const audioPartTitle = document.getElementById('audio-part-title');
 const audioProgress = document.getElementById('audio-progress');
 
 const modeAudioBtn = document.getElementById('mode-audio-btn');
-const flashcardAudioBtn = document.getElementById('flashcard-audio-btn');
 
 const audioStatusBadge = document.getElementById('audio-status-badge');
 const audioStatusIcon = document.getElementById('audio-status-icon');
@@ -1251,13 +1242,6 @@ if (modeAudioBtn) {
         if (isNaN(start) || start < 1) start = 1;
         if (isNaN(end) || end < start) end = 150;
         startAudioMode(currentSelectedPart, start, end);
-    });
-}
-
-if (flashcardAudioBtn) {
-    flashcardAudioBtn.addEventListener('click', () => {
-        const currentWord = words[currentIndex] ? words[currentIndex].word : null;
-        startAudioMode(currentSelectedPart || (words[0] ? words[0].part : 1), null, null, currentWord);
     });
 }
 
