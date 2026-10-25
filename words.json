@@ -13858,5 +13858,16 @@
     "hindi_word": "उदारता",
     "hindi_desc": "उपहार या धन देने में अत्यधिक उदारता; दानशीलता, मुक्तहस्त दान",
     "easy_english": "Simple synonyms: generosity, liberality, munificence, bounty, philanthropy"
+  },
+  {
+    "num": "263",
+    "part": "EXTRA",
+    "word": "ENDOWMENTS",
+    "pos": "n",
+    "description": "financial gifts or donations; funds or property donated to an institution to provide ongoing income",
+    "hindi_meaning": "वित्तीय दान / दान-निधि / अक्षयनिधि",
+    "hindi_word": "दान-निधि",
+    "hindi_desc": "वित्तीय उपहार या दान; किसी संस्थान को दी जाने वाली स्थायी अनुदान निधि",
+    "easy_english": "Simple synonyms: donations, grants, funding, bequests, financial gifts, subsidies"
   }
 ]
