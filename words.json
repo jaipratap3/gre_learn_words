@@ -13902,5 +13902,16 @@
     "hindi_word": "कम होना",
     "hindi_desc": "पीछे हटना या घटना (जैसे समुद्र का भाटा); धीरे-धीरे कम या क्षीण होना",
     "easy_english": "Simple synonyms: recede, subside, decline, diminish, wane, fade away, dwindle"
+  },
+  {
+    "num": "267",
+    "part": "EXTRA",
+    "word": "WANE",
+    "pos": "vb/n",
+    "description": "gradual decline (in size or strength or power or number); decrease in vigor or extent",
+    "hindi_meaning": "घटना / क्षीण होना / पतन की ओर जाना",
+    "hindi_word": "क्षीण होना",
+    "hindi_desc": "आकार, शक्ति, प्रभाव या संख्या में धीरे-धीरे कमी आना; कमजोर होना",
+    "easy_english": "Simple synonyms: decline, diminish, decrease, dwindle, fade, subside, ebb"
   }
 ]
