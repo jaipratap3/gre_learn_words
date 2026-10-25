@@ -13825,5 +13825,16 @@
     "hindi_word": "अतिशयोक्तिपूर्ण",
     "hindi_desc": "आडंबरपूर्ण और शेखी बघारने वाला ढंग; बढ़ा-चढ़ाकर कहा गया",
     "easy_english": "Simple synonyms: pompous, grandiloquent, pretentious, bombastic, inflated, exaggerated"
+  },
+  {
+    "num": "260",
+    "part": "EXTRA",
+    "word": "HORTATORY",
+    "pos": "adj",
+    "description": "giving strong encouragement; urging or encouraging to some course of conduct",
+    "hindi_meaning": "प्रोत्साहित करने वाला / उपदेशात्मक",
+    "hindi_word": "प्रोत्साहित करने वाला",
+    "hindi_desc": "दृढ़ प्रोत्साहन देने वाला; आगे बढ़ने या कार्य करने के लिए प्रेरित करने वाला",
+    "easy_english": "Simple synonyms: encouraging, exhortative, urging, inspiring, persuasive"
   }
 ]
