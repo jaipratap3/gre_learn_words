@@ -13836,5 +13836,16 @@
     "hindi_word": "प्रोत्साहित करने वाला",
     "hindi_desc": "दृढ़ प्रोत्साहन देने वाला; आगे बढ़ने या कार्य करने के लिए प्रेरित करने वाला",
     "easy_english": "Simple synonyms: encouraging, exhortative, urging, inspiring, persuasive"
+  },
+  {
+    "num": "261",
+    "part": "EXTRA",
+    "word": "INOPPORTUNE",
+    "pos": "adj",
+    "description": "not appropriate action or time; occurring at an inconvenient or unsuitable time",
+    "hindi_meaning": "असमय / अनुचित / बेवक़्त",
+    "hindi_word": "असमय",
+    "hindi_desc": "अनुचित समय या कार्य; असामयिक, बेमौके",
+    "easy_english": "Simple synonyms: untimely, inconvenient, ill-timed, unseasonable, inappropriate"
   }
 ]
