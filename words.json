@@ -13891,5 +13891,16 @@
     "hindi_word": "संतुलित",
     "hindi_desc": "अपनी इंद्रियों पर पूर्ण नियंत्रण; संतुलन, आत्मविश्वास और कार्रवाई के लिए तत्परता",
     "easy_english": "Simple synonyms: composed, self-possessed, balanced, collected, calm, prepared"
+  },
+  {
+    "num": "266",
+    "part": "EXTRA",
+    "word": "EBB",
+    "pos": "vb/n",
+    "description": "gradually decline in magnitude; fall back or recede; diminish",
+    "hindi_meaning": "घटना / कम होना / भाटा (ज्वार का उतरना)",
+    "hindi_word": "कम होना",
+    "hindi_desc": "पीछे हटना या घटना (जैसे समुद्र का भाटा); धीरे-धीरे कम या क्षीण होना",
+    "easy_english": "Simple synonyms: recede, subside, decline, diminish, wane, fade away, dwindle"
   }
 ]
