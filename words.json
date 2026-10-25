@@ -13803,5 +13803,16 @@
     "hindi_word": "",
     "hindi_desc": "",
     "easy_english": ""
+  },
+  {
+    "num": "258",
+    "part": "EXTRA",
+    "word": "IMPENDING",
+    "pos": "adj",
+    "description": "close in time; about to occur",
+    "hindi_meaning": "आसन्न (सिर पर)",
+    "hindi_word": "आसन्न (सिर पर)",
+    "hindi_desc": "समय में निकट; घटित होने वाला",
+    "easy_english": "Simple synonyms: imminent, approaching, looming, nearing, forthcoming"
   }
 ]
