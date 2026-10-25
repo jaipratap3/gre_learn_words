@@ -617,9 +617,9 @@ header p {
         font-size: 0.9rem;
     }
 
-    #back-btn, #quiz-back-btn, #match-back-btn {
+    #back-btn, #quiz-back-btn, #match-back-btn, #audio-back-btn, #flashcard-audio-btn {
         position: static !important;
-        margin-bottom: 1rem;
+        margin-bottom: 0.8rem;
         width: 100%;
     }
 

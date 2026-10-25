@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRE Flashcards</title>
-    <link rel="stylesheet" href="style.css?v=14">
+    <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
     <div class="app-container">
@@ -36,6 +36,9 @@
         <div id="flashcard-view" class="view hidden container">
             <header style="position: relative; width: 100%;">
                 <button id="back-btn" class="btn btn-outline" style="position: absolute; left: 0; top: 0;">&larr; Back</button>
+                <button id="flashcard-audio-btn" class="btn btn-outline" style="position: absolute; right: 0; top: 0; display: inline-flex; align-items: center; gap: 0.4rem; border-color: rgba(139, 92, 246, 0.4); color: #c084fc;">
+                    🎧 Audio Study
+                </button>
                 <h1 id="part-title">Flashcards</h1>
                 <p>1000 Most Important Words</p>
             </header>
@@ -263,6 +266,6 @@
     </div>
     <div id="sidebar-overlay" class="overlay hidden"></div>
 
-    <script src="script.js?v=17"></script>
+    <script src="script.js?v=18"></script>
 </body>
 </html>

@@ -330,9 +330,14 @@ function renderCard() {
                     </div>
                 </div>
                 ` : ''}
-                <button onclick="openTranslation(event, \`${wordObj.description.replace(/`/g, "'")}\`, \`${wordObj.word}\`)" class="translate-btn" style="margin-top: 1rem;">
-                    Meaning & Translation
-                </button>
+                <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; width: 100%;">
+                    <button onclick="openTranslation(event, \`${wordObj.description.replace(/`/g, "'")}\`, \`${wordObj.word}\`)" class="translate-btn" style="margin-top: 0;">
+                        Meaning & Translation
+                    </button>
+                    <button onclick="event.stopPropagation(); startAudioFromFlashcard();" class="translate-btn" style="margin-top: 0; background: rgba(139, 92, 246, 0.2); border-color: #a855f7; color: #c084fc; display: inline-flex; align-items: center; gap: 0.4rem;">
+                        🎧 Audio Study
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -808,6 +813,17 @@ const audioPartTitle = document.getElementById('audio-part-title');
 const audioProgress = document.getElementById('audio-progress');
 
 const modeAudioBtn = document.getElementById('mode-audio-btn');
+const flashcardAudioBtn = document.getElementById('flashcard-audio-btn');
+let audioSourceView = 'home'; // 'home' or 'flashcard'
+
+function startAudioFromFlashcard() {
+    if (!words || words.length === 0) return;
+    const wordObj = words[currentIndex];
+    if (!wordObj) return;
+    audioSourceView = 'flashcard';
+    const targetPart = wordObj.part || currentSelectedPart || 1;
+    startAudioMode(targetPart, null, null, wordObj.word);
+}
 
 const audioStatusBadge = document.getElementById('audio-status-badge');
 const audioStatusIcon = document.getElementById('audio-status-icon');
@@ -1244,6 +1260,7 @@ function startAudioMode(partNum, startWordNum = null, endWordNum = null, specifi
 // Audio Mode Event Listeners
 if (modeAudioBtn) {
     modeAudioBtn.addEventListener('click', () => {
+        audioSourceView = 'home';
         modeModal.classList.add('hidden');
         let start = parseInt(quizStart.value, 10);
         let end = parseInt(quizEnd.value, 10);
@@ -1253,12 +1270,28 @@ if (modeAudioBtn) {
     });
 }
 
+if (flashcardAudioBtn) {
+    flashcardAudioBtn.addEventListener('click', startAudioFromFlashcard);
+}
+
 if (audioBackBtn) {
     audioBackBtn.addEventListener('click', () => {
         stopAudioTimersAndSpeech();
         isAudioPlaying = false;
         audioView.classList.add('hidden');
-        homeView.classList.remove('hidden');
+        if (audioSourceView === 'flashcard') {
+            if (audioWords && audioWords[audioIndex]) {
+                const currentAudioWord = audioWords[audioIndex].word;
+                const targetIdx = words.findIndex(w => w.word.toUpperCase() === currentAudioWord.toUpperCase());
+                if (targetIdx !== -1) {
+                    currentIndex = targetIdx;
+                    renderCard();
+                }
+            }
+            flashcardView.classList.remove('hidden');
+        } else {
+            homeView.classList.remove('hidden');
+        }
     });
 }
 
